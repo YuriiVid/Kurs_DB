@@ -1,0 +1,43 @@
+@model Tuple<List<LoginModel>, string>
+@{
+	ViewData["Title"] = "Результати пошуку";
+	var Admins = Model.Item1;
+	var search_value = Model.Item2;
+}
+<h1 style="text-align: left;">Результати пошуку</h1>
+<a class="button" asp-action="AdminManagment" asp-controller="Login">На головну</a>
+<form method="GET" asp-action="Search" asp-controller="Login">
+	<input type="text" name="search_value" id="search_value" placeholder="Пошук..." value="@search_value">
+	<button type="submit" value="Submit" name="search_button">Пошук</button>
+</form>
+@if (Admins.Any())
+{
+	<table class="wide">
+		<tr>
+			<th>Логін</th>
+			<th>Пароль</th>
+			<th>Дії</th>
+		</tr>
+		@foreach (var a in Admins)
+		{
+			<tr>
+				<td>@a.Login</td>
+				<td>@a.Password</td>
+				<td>
+					<form id="@a.Id e" class="edit" asp-action="Edit" asp-controller="Login" method="POST">
+						<input type='hidden' name='admin_id' value=@a.Id />
+						<a name="admin_id" href="#" onclick='document.getElementById("@a.Id e").submit();'>Редагувати</a>
+					</form>
+					<form id="@a.Id d" class="delete" asp-action="Delete" asp-controller="Login" method="POST">
+						<input type='hidden' name='admin_id' value=@a.Id />
+						<a name="admin_id" href="#" onclick='document.getElementById("@a.Id d").submit();'>Видалити</a>
+					</form>
+				</td>
+			</tr>
+		}
+	</table>
+}
+else
+{
+	<p>Нічого не знайдено.</p>
+}

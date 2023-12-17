@@ -1,0 +1,21 @@
+@using Kurs_DB.Models
+@model LoginModel
+@{
+	ViewData["Title"] = "Редагувати адміна";
+	var Admin = Model;
+}
+<h1>Редагувати адміна</h1>
+
+<form method="POST" asp-action="SaveEditChanges" asp-controller="Login">
+	<input type="hidden" name="admin_id" value=@Admin.Id>
+
+	<div class="inline-grid">
+		<label for="model_name">Логін:</label>
+		<input type="text" id="login" name="login" value="@Admin.Login" required @(Admin.Login == "superuser" ?
+			"readonly" : "")>
+		<label for="password">Пароль:</label>
+		<input type="text" name="password" id="password" value="@Admin.Password" required>
+	</div>
+	<br><button type="submit">Зберегти</button>
+	<a class="button" asp-action="AdminManagment" asp-controller="Login">Скасувати</a>
+</form>

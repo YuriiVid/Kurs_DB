@@ -1,0 +1,42 @@
+@model string;
+@{
+	ViewData["Title"] = "Вхід";
+	var message = Model;
+}
+<section class="vh-100 gradient-custom">
+	<div class="container py-5 h-100">
+		<div class="row d-flex justify-content-center align-items-center h-100">
+			<div class="col-12 col-md-8 col-lg-6 col-xl-5">
+				<div class="card bg-dark text-white" style="border-radius: 1rem;">
+					<div class="card-body p-5 text-center">
+
+						<div class="mb-md-5 mt-md-4 pb-5">
+							<form asp-controller="Login" asp-action="Confirmation" id="login" method="POST">
+								<h2 class="fw-bold mb-2 text-uppercase">Вхід</h2>
+								<p class="text-white-50 mb-5">Введіть ваш логін та пароль</p>
+
+								<div class="form-outline form-white mb-4">
+									<label class="form-label" for="Login">Логін</label>
+									<input name="login" type="text" id="Login" class="form-control form-control-lg" />
+
+								</div>
+
+								<div class="form-outline form-white mb-4">
+									<label class="form-label" for="Password">Пароль</label>
+									<input name="password" type="password" id="Password"
+										class="form-control form-control-lg" />
+									@if (message == "Wrong")
+									{
+										<p class="text-white-50 mb-5">Неправильно введений логін чи пароль</p>
+									}
+								</div>
+								<button class="btn btn-outline-light btn-lg px-5" type="submit">Увійти</button>
+							</form>
+							<a class="button" asp-action="Index" asp-controller="WaterMeter">На головну</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</section>

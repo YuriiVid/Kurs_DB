@@ -1,0 +1,60 @@
+@model Tuple<List<WaterMeterModel>, string>
+@{
+	ViewData["Title"] = "Результати пошуку";
+	var WaterMeters = Model.Item1;
+	var search_value = Model.Item2;
+
+	var Role = Context.Session.GetString("Role");
+}
+<h1 style="text-align: left;">Результати пошуку</h1>
+<a class="button" asp-action="Index" asp-controller="WaterMeter">На головну</a>
+<form method="GET" asp-action="Search" asp-controller="WaterMeter">
+	<input type="text" name="search_value" id="search_value" placeholder="Пошук..." value="@search_value">
+	<button type="submit" value="Submit" name="search_button">Пошук</button>
+</form>
+@if (WaterMeters.Any())
+{
+	<table class="wide">
+		<tr>
+			<th>Модель</th>
+			<th>Виробник</th>
+			<th>Характеристики</th>
+			<th>Дії</th>
+		</tr>
+		@foreach (var wm in WaterMeters)
+		{
+			<tr>
+				<td>@wm.Name</td>
+				<td>@wm.Manufacturer</td>
+				<td>@foreach (string key in wm.Properties.AllKeys)
+					{
+						@String.Format("{0}: {1}", key, wm.Properties[key])
+						<br>
+					}
+				</td>
+				<td>
+					@if (Role != "user")
+					{
+						<form id="@wm.Id e" class="edit" asp-action="Edit" asp-controller="WaterMeter" method="POST">
+							<input type='hidden' name='waterMeter_id' value=@wm.Id />
+							<a name="waterMeter_id" href="#" onclick='document.getElementById("@wm.Id e").submit();'>Редагувати</a>
+						</form>
+
+						<form id="@wm.Id d" class="delete" asp-action="Delete" asp-controller="WaterMeter" method="POST">
+							<input type='hidden' name='waterMeter_id' value=@wm.Id />
+							<a name="waterMeter_id" href="#" onclick='document.getElementById("@wm.Id d").submit();'>Видалити</a>
+						</form>
+					}
+					else
+					{
+						<p>Увійдіть, щоб взаємодіяти із записами у таблиці</p>
+					}
+				</td>
+			</tr>
+		}
+	</table>
+}
+else
+{
+	<p>Нічого не знайдено.</p>
+}

@@ -1,0 +1,130 @@
+﻿@using Kurs_DB.Models
+@model List<PropertyModel>
+@{
+	ViewData["Title"] = "Характеристики лічильників води";
+	var Properties = Model;
+	var Role = Context.Session.GetString("Role");
+	var Username = Context.Session.GetString("Username");
+	var Error = Context.Session.GetString("Error");
+}
+
+@if (Error != null)
+{
+	@section Scripts {
+	<script>
+		$(document).ready(function () {
+			alert(htmlDecode("@Error"));
+		});
+	</script>
+	}
+	Context.Session.Remove("Error");
+}
+
+<header>
+	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
+		<div class="container-fluid">
+			<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+				<ul class="navbar-nav flex-grow-1">
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+							asp-controller="WaterMeter" asp-action="Index">Лічильники води</a></li>
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand active"
+							asp-action="Index" asp-controller="Property">Характеристики</a></li>
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+							asp-action="Index" asp-controller="Manufacturer">Виробники</a></li>
+					@if (Role == "user")
+					{
+						<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+								asp-action="Index" asp-controller="Login">Вхід</a></li>
+					}
+					else
+					{
+						<li class="nav-item dropdown"><a style="text-decoration:none;"
+								class="nav-link navbar-brand dropdown-toggle" href="#" id="navbarDropdownMenuLink"
+								data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Вітаємо, @Username</a>
+							<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+								@if (Username == "superuser")
+								{
+									<a style="text-decoration:none;" class="dropdown-item" asp-action="AdminManagment"
+										asp-controller="Login">Управління адмінами</a>
+								}
+								<a style="text-decoration:none;" class="dropdown-item" asp-action="Logout"
+									asp-controller="Login">Вийти</a>
+							</div>
+						</li>
+					}
+				</ul>
+			</div>
+		</div>
+	</nav>
+</header>
+
+<h1>Характеристики лічильників води</h1>
+
+<form asp-controller="Property" asp-action="Search" id="search" method="GET">
+	<input type="text" name="search_value" id="search_value" placeholder="Пошук...">
+	<button type="submit" value="Submit" name="search_button">Пошук</button>
+</form>
+
+@if (Role != "user")
+{
+	<div class="sidebar">
+		<details>
+			<summary>
+				<h2>Додати характеристику </h2>
+			</summary>
+			<form class="add" asp-action="Add" asp-controller="Property" method="POST">
+				<label for="property_name">Назва характеристики:</label>
+				<input type="text" name="property_name" id="property_name" value="" required>
+				<label>Значення характеристики (натисність "+" щоб додати нове поле для
+					вводу):</label>
+				<div id="input_fields">
+					<input type="text" name="new_property_value" id="new_property_value" value="" required>
+					<br>
+				</div>
+				<input type="button" onclick="add_input_fields('input_fields');" value="+" /><br>
+				<br><button type="submit" value="Save">Зберегти</button>
+				<a class="button" href="">Скасувати</a>
+			</form>
+		</details>
+	</div>
+}
+<table>
+	<tr>
+		<th>Назва характеристики</th>
+		<th>Значення характеристики</th>
+		<th>Дії</th>
+	</tr>
+	@if (Properties != null && Properties.Any())
+	{
+		@foreach (var p in Properties)
+		{
+			<tr>
+				<td>@p.Name</td>
+				<td>@foreach (string value in p.Values)
+					{
+						@value
+						<br>
+					}
+				</td>
+				<td>
+					@if (Role != "user")
+					{
+						<form id="@p.Id e" class="edit" asp-action="PostEdit" asp-controller="Property" method="POST">
+							<input type='hidden' name='property_id' value=@p.Id />
+							<a name="property_id" href="#" onclick='document.getElementById("@p.Id e").submit();'>Редагувати</a>
+						</form>
+						<form id="@p.Id d" class="delete" asp-action="Delete" asp-controller="Property" method="POST">
+							<input type='hidden' name='property_id' value=@p.Id />
+							<a name="property_id" href="#" onclick='document.getElementById("@p.Id d").submit();'>Видалити</a>
+						</form>
+					}
+					else
+					{
+						<p>Увійдіть, щоб взаємодіяти із записами у таблиці</p>
+					}
+				</td>
+			</tr>
+		}
+	}
+</table>

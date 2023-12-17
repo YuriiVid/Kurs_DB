@@ -1,0 +1,116 @@
+@using Kurs_DB.Models
+@model List<ManufacturerModel>
+@{
+	ViewData["Title"] = "Характеристики лічильників води";
+	var Manufacturers = Model;
+	var Role = Context.Session.GetString("Role");
+	var Username = Context.Session.GetString("Username");
+	var Error = Context.Session.GetString("Error");
+}
+
+@if (Error != null )
+{
+	@section Scripts {
+	<script>
+		$(document).ready(function () {
+			alert(htmlDecode("@Error"));
+		});
+	</script>
+	}
+	Context.Session.Remove("Error");
+}
+
+<header>
+	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
+		<div class="container-fluid">
+			<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+				<ul class="navbar-nav flex-grow-1">
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+							asp-controller="WaterMeter" asp-action="Index">Лічильники води</a></li>
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+							asp-action="Index" asp-controller="Property">Характеристики</a></li>
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand active"
+							asp-action="Index" asp-controller="Manufacturer">Виробники</a></li>
+					@if (Role == "user")
+					{
+						<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+								asp-action="Index" asp-controller="Login">Вхід</a></li>
+					}
+					else
+					{
+						<li class="nav-item dropdown"><a style="text-decoration:none;"
+								class="nav-link navbar-brand dropdown-toggle" href="#" id="navbarDropdownMenuLink"
+								data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Вітаємо, @Username</a>
+							<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+								@if (Username == "superuser")
+								{
+									<a style="text-decoration:none;" class="dropdown-item" asp-action="AdminManagment"
+										asp-controller="Login">Управління адмінами</a>
+								}
+								<a style="text-decoration:none;" class="dropdown-item" asp-action="Logout"
+									asp-controller="Login">Вийти</a>
+							</div>
+						</li>
+					}
+				</ul>
+			</div>
+		</div>
+	</nav>
+</header>
+
+<h1>Виробники лічильників води</h1>
+
+<form asp-controller="Manufacturer" asp-action="Search" id="search" method="GET">
+	<input type="text" name="search_value" id="search_value" placeholder="Пошук...">
+	<button type="submit" value="Submit" name="search_button">Пошук</button>
+</form>
+@if (Role != "user")
+{
+	<div class="sidebar">
+		<details>
+			<summary>
+				<h2>Додати виробника</h2>
+			</summary>
+			<form class="add" asp-action="Add" asp-controller="Manufacturer" method="POST">
+				<label for="manufacturer_name">Ім'я виробника:</label>
+				<input type="text" name="manufacturer_name" id="manufacturer_name" required>
+				<br><button type="submit" value="Save">Зберегти</button>
+				<a class="button" href="">Скасувати</a>
+			</form>
+		</details>
+	</div>
+}
+
+<table>
+	<tr>
+		<th>Виробник</th>
+		<th>Дії</th>
+	</tr>
+	@if (Manufacturers != null && Manufacturers.Any())
+	{
+		@foreach (var m in Manufacturers)
+		{
+			<tr>
+				<td>@m.Name</td>
+				<td>
+					@if (Role != "user")
+					{
+						<form id="@m.Id e" class="edit" asp-action="Edit" asp-controller="Manufacturer" method="POST">
+							<input type='hidden' name='manufacturer_id' value=@m.Id />
+							<a name="manufacturer_id" href="#" onclick='document.getElementById("@m.Id e").submit();'>Редагувати</a>
+						</form>
+						<form id="@m.Id d" class="delete" asp-action="Delete" asp-controller="Manufacturer" method="POST">
+							<input type='hidden' name='manufacturer_id' value=@m.Id />
+							<a name="manufacturer_id" href="#" onclick='document.getElementById("@m.Id d").submit();'>Видалити</a>
+						</form>
+					}
+					else
+					{
+						<p>Увійдіть, щоб взаємодіяти із записами у таблиці</p>
+					}
+				</td>
+			</tr>
+		}
+	}
+</table>

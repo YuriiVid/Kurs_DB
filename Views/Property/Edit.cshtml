@@ -1,0 +1,62 @@
+@using Kurs_DB.Models
+@model PropertyModel
+@{
+	var Property = Model;
+	ViewData["Title"] = "Редагувати характеристику";
+	var Error = Context.Session.GetString("Error");
+}
+
+@if (Error != null)
+{
+	@section Scripts {
+	<script>
+		$(document).ready(function () {
+			alert(htmlDecode("@Error"));
+		});
+	</script>
+	}
+	Context.Session.Remove("Error");
+}
+
+<h1>Редагувати характеристику</h1>
+@foreach (var value in Property.Values)
+{
+	<form id="@value d" class="delete" asp-action="DeletePropertyValue" asp-controller="Property" method="GET">
+		<input type='hidden' name='property_id' value="@Property.Id" />
+		<input type='hidden' name='property_value' value="@value" />
+
+	</form>
+}
+
+<form method="POST" asp-action="SaveEditChanges" asp-controller="Property">
+	<input type="hidden" name="property_id" value=@Property.Id>
+
+	<div class="inline-grid">
+		<label for="property_name">Назва характеристики:</label>
+		<input type="text" id="property_name" name="property_name" value="@Property.Name">
+	</div>
+
+	<div class="inline-grid" id="existing_property_values">
+
+		<label for="existing_property_values">Існуючі значення характеристик:</label>
+		@foreach (var value in Property.Values)
+		{
+			<div>
+				<input type="text" id="@value" name="@value" value="@value">
+				<a href="#" onclick='document.getElementById("@value d").submit();'>Видалити</a>
+			</div>
+		}
+	</div>
+	<div id="new_property_values">
+		<label for="new_property_values">Додати нові значення характеристики (натисність "+" щоб додати нове поле для
+			вводу):</label>
+		<div id="new_inputs">
+			<input type="text" name="new_property_value" id="new_property_value">
+			<br>
+		</div>
+		<input type="button" onclick="add_input_fields('new_inputs');" value="+" />
+	</div>
+
+	<button type="submit">Зберегти</button>
+	<a class="button" asp-action="Index" asp-controller="Property">Скасувати</a>
+</form>

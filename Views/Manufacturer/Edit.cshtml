@@ -1,0 +1,19 @@
+@using Kurs_DB.Models
+@model ManufacturerModel
+@{
+	ViewData["Title"] = "Редагувати виробника";
+	var Manufacturer = Model;
+}
+<h1>Редагувати виробника</h1>
+
+<form method="POST" asp-action="SaveEditChanges" asp-controller="Manufacturer">
+	<input type="hidden" name="manufacturer_id" value=@Manufacturer.Id>
+
+	<div class="inline-grid">
+		<label for="model_name">Назва виробника:</label>
+		<input type="text" id="manufacturer_name" name="manufacturer_name" value="@Manufacturer.Name">
+	</div>
+	<br>
+	<button type="submit">Зберегти</button>
+	<a class="button" asp-action="Index" asp-controller="Manufacturer">Скасувати</a>
+</form>

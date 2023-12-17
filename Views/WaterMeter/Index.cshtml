@@ -1,0 +1,183 @@
+﻿@using Kurs_DB.Models
+@model Tuple<List<WaterMeterModel>, List<ManufacturerModel>, List<PropertyModel>>
+@{
+	ViewData["Title"] = "Моделі та характеристики лічильників води";
+	var Properties = Model.Item3;
+	var Manufacturers = Model.Item2;
+	var WaterMeters = Model.Item1;
+	var Username = Context.Session.GetString("Username");
+	var Role = Context.Session.GetString("Role");
+	var Error = Context.Session.GetString("Error");
+}
+
+@if (Error != null)
+{
+	@section Scripts {
+	<script>
+		$(document).ready(function () {
+			alert(htmlDecode("@Error"));
+		});
+	</script>
+	}
+	Context.Session.Remove("Error");
+}
+
+<header>
+	<nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light border-bottom box-shadow mb-3">
+		<div class="container-fluid">
+			<div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
+				<ul class="navbar-nav flex-grow-1">
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand active"
+							asp-controller="WaterMeter" asp-action="Index">Лічильники води</a></li>
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+							asp-action="Index" asp-controller="Property">Характеристики</a></li>
+					<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+							asp-action="Index" asp-controller="Manufacturer">Виробники</a></li>
+					@if (Role == "user")
+					{
+						<li class="nav-item"><a style="text-decoration:none;" class="nav-link navbar-brand"
+								asp-action="Index" asp-controller="Login">Вхід</a></li>
+					}
+					else
+					{
+						<li class="nav-item dropdown"><a style="text-decoration:none;" class="nav-link navbar-brand dropdown-toggle" href="#"
+								id="navbarDropdownMenuLink" data-bs-toggle="dropdown" aria-haspopup="true"
+								aria-expanded="false">
+								Вітаємо, @Username</a>
+							<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+								@if (Username == "superuser")
+								{
+									<a style="text-decoration:none;" class="dropdown-item" asp-action="AdminManagment"
+										asp-controller="Login">Управління адмінами</a>
+								}
+								<a style="text-decoration:none;" class="dropdown-item" asp-action="Logout"
+									asp-controller="Login">Вийти</a>
+							</div>
+						</li>
+					}
+				</ul>
+			</div>
+		</div>
+	</nav>
+</header>
+
+<h1>Моделі та характеристики лічильників води</h1>
+
+<form asp-controller="WaterMeter" asp-action="Search" id="search" method="GET">
+	<input type="text" name="search_value" id="search_value" placeholder="Пошук...">
+	<button type="submit" value="Submit" name="search_button">Пошук</button>
+</form>
+
+<div class="sidebar">
+	<details>
+		<summary>
+			<h2>Фільтри</h2>
+		</summary>
+		<form class="filter" method="POST" asp-action="Filter" asp-controller="WaterMeter">
+			<label>Виробник:</label>
+			<select name="manufacturer_name">
+				<option value="">Всі</option>
+				@foreach (var m in Manufacturers)
+				{
+					<option value=@m.Name>@m.Name</option>
+				}
+			</select>
+			<div>
+				@foreach (var p in Properties)
+				{
+					<label>@p.Name</label>
+					<select name="@p.Name">
+						<option value="">Всі</option>
+						@foreach (var p_value in p.Values)
+						{
+							<option>@p_value</option>
+						}
+					</select>
+				}
+			</div>
+			<button type="submit">Застосувати</button>
+			<a class="button" asp-action="Index" asp-controller="WaterMeter">Скинути</a>
+		</form>
+	</details>
+	@if (Role != "user")
+	{
+		<br>
+		<details>
+			<summary>
+				<h2>Додати модель </h2>
+			</summary>
+			<form class="add" asp-action="Add" asp-controller="WaterMeter" method="POST">
+				<label for="model_name">Назва моделі:</label>
+				<input type="text" name="model_name" id="model_name" value="" required>
+
+				<label for="manufacturer_name">Виробник:</label>
+				<select name="manufacturer_id" id="manufacturer_name" required>
+					<option value="">-- Виберіть значення --</option>
+					@foreach (var m in Manufacturers)
+					{
+						<option value=@m.Id>@m.Name</option>
+					}
+				</select>
+				<div>
+					@foreach (var p in Properties)
+					{
+						<label>@p.Name</label>
+						<select name="@p.Name" required>
+							<option value="">-- Виберіть значення --</option>
+							@foreach (var p_value in p.Values)
+							{
+								<option>@p_value</option>
+							}
+						</select>
+					}
+				</div>
+
+				<button type="submit" value="Save">Зберегти</button>
+				<a class="button" href="">Скасувати</a>
+			</form>
+		</details>
+	}
+</div>
+
+<table>
+	<tr>
+		<th>Назва моделі</th>
+		<th>Виробник</th>
+		<th>Характеристики</th>
+		<th>Дії</th>
+	</tr>
+	@if (WaterMeters != null && WaterMeters.Any())
+	{
+		@foreach (var wm in WaterMeters)
+		{
+			<tr>
+				<td>@wm.Name</td>
+				<td>@wm.Manufacturer</td>
+				<td>@foreach (string key in wm.Properties.AllKeys)
+					{
+						@String.Format("{0}: {1}", key, wm.Properties[key])
+						<br>
+					}
+				</td>
+				<td>
+					@if (Role != "user")
+					{
+						<form id="@wm.Id e" class="edit" asp-action="Edit" asp-controller="WaterMeter" method="POST">
+							<input type='hidden' name='waterMeter_id' value=@wm.Id />
+							<a name="waterMeter_id" href="#" onclick='document.getElementById("@wm.Id e").submit();'>Редагувати</a>
+						</form>
+
+						<form id="@wm.Id d" class="delete" asp-action="Delete" asp-controller="WaterMeter" method="POST">
+							<input type='hidden' name='waterMeter_id' value=@wm.Id />
+							<a name="waterMeter_id" href="#" onclick='document.getElementById("@wm.Id d").submit();'>Видалити</a>
+						</form>
+					}
+					else
+					{
+						<p>Увійдіть, щоб взаємодіяти із записами у таблиці</p>
+					}
+				</td>
+			</tr>
+		}
+	}
+</table>

@@ -1,0 +1,43 @@
+@using Kurs_DB.Models
+@model Tuple<List<ManufacturerModel>, List<PropertyModel>, WaterMeterModel>
+@{
+	ViewData["Title"] = "Редагувати модель";
+	var Properties = Model.Item2;
+	var Manufacturers = Model.Item1;
+	var WaterMeter = Model.Item3;
+}
+<h1>Редагувати модель</h1>
+
+<form method="POST" asp-action="SaveEditChanges" asp-controller="WaterMeter">
+	<input type="hidden" name="waterMeter_id" value=@WaterMeter.Id>
+
+	<div class="inline-grid">
+		<label for="model_name">Назва моделі:</label>
+		<input type="text" id="model_name" name="model_name" value="@WaterMeter.Name">
+	</div>
+
+	<div class="inline-grid">
+		<label for="manufacturer_id">Виробник:</label>
+		<select id="manufacturer_id" name="manufacturer_id">
+			@foreach (var m in Manufacturers)
+			{
+				<option value=@m.Id selected="@(WaterMeter.Manufacturer == m.Name)">@m.Name</option>
+			}
+		</select>
+	</div>
+	<div class="inline-grid">
+		@foreach (var p in Properties)
+		{
+			<label>@p.Name:</label>
+			<select name=@p.Name>
+				@foreach (var p_value in p.Values)
+				{
+					<option value=@p_value selected="@(WaterMeter.Properties[p.Name] == p_value)">@p_value</option>
+				}
+			</select>
+		}
+	</div>
+	<br>
+	<button type="submit">Зберегти</button>
+	<a class="button" asp-action="Index" asp-controller="WaterMeter">Скасувати</a>
+</form>
